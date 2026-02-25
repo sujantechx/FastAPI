@@ -1,0 +1,20 @@
+from fastapi import FastAPI
+
+from schemas import InputSchema ,OutputSchema
+from predict import make_prediction , make_batch_predictions
+
+
+app = FastAPI()
+@app.get('/')
+def index():
+    return {'message': "Welcome to the ML model API"}
+
+@app.post('/predictions', response_model=OutputSchema)
+def predict(user_input: InputSchema):
+    prediction= make_prediction(user_input.model_dump())
+    return OutputSchema(predicted_price=round(prediction,2))
+
+@app.post('/batch_predictions', response_model=List[OutputSchema])
+def batch_predict(user_inputs: list[InputSchema]):
+    predictions=make_batch_predictions([X.model_dump() for X in user_inputs])
+    return [OutputSchema(predicted_price=round(predictions, 2)) for prediction in predictions]
